@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-__version__ = '0.3.0'
+__version__ = '0.4.0'
 
 DOCUMENTATION = '''
 ---
@@ -54,6 +54,10 @@ options:
     description:
       - Whether to strictly check the host key when doing connections to the remote host
     choices: ['yes', 'no', 'ask']
+  forward_agent:
+    description:
+      - Specifies whether the connection to the authentication agent (if any) will be forwarded to the remote machine
+    choices: ['yes', 'no']
   proxycommand:
     description:
       - Sets the ProxyCommand option.
@@ -709,6 +713,10 @@ def main():
                 default=None,
                 choices=['yes', 'no', 'ask']
             ),
+            forward_agent=dict(
+                default=None,
+                choices=['yes', 'no']
+            )
         ),
         supports_check_mode=True
     )
@@ -721,6 +729,7 @@ def main():
         identity_file=module.params.get('identity_file'),
         user=module.params.get('remote_user'),
         strict_host_key_checking=module.params.get('strict_host_key_checking'),
+        forward_agent=module.params.get('forward_agent'),
         user_known_hosts_file=module.params.get('user_known_hosts_file'),
         proxycommand=module.params.get('proxycommand'),
     )
@@ -789,7 +798,6 @@ def main():
         config.write_to_ssh_config()
         # MAKE sure the file is owned by the right user
         module.set_owner_if_different(config_file, user, False)
-        module.set_group_if_different(config_file, user, False)
         module.set_mode_if_different(config_file, '0600', False)
 
     module.exit_json(changed=config_changed,
